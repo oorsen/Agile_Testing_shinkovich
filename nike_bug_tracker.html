@@ -1,0 +1,504 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+.app{display:flex;height:100vh;min-height:600px;background:var(--color-background-tertiary)}
+.sidebar{width:220px;min-width:220px;background:var(--color-background-primary);border-right:0.5px solid var(--color-border-tertiary);display:flex;flex-direction:column;padding:0}
+.sidebar-logo{padding:20px 16px 16px;border-bottom:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;gap:10px}
+.nike-swoosh{font-size:22px;font-weight:500;letter-spacing:-1px;color:var(--color-text-primary)}
+.sidebar-proj{padding:8px 16px;font-size:11px;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.8px;margin-top:12px}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 16px;font-size:13px;cursor:pointer;color:var(--color-text-secondary);border-radius:0;transition:background .15s}
+.nav-item:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
+.nav-item.active{background:var(--color-background-secondary);color:var(--color-text-primary);font-weight:500}
+.nav-item i{font-size:16px}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);padding:12px 24px;display:flex;align-items:center;justify-content:space-between}
+.topbar-title{font-size:15px;font-weight:500;color:var(--color-text-primary)}
+.topbar-sub{font-size:12px;color:var(--color-text-secondary);margin-top:2px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);font-size:13px;cursor:pointer;background:transparent;color:var(--color-text-primary);transition:background .15s}
+.btn:hover{background:var(--color-background-secondary)}
+.btn-primary{background:#111;color:#fff;border-color:#111}
+.btn-primary:hover{background:#333;border-color:#333}
+.btn i{font-size:15px}
+.content{flex:1;overflow-y:auto;padding:20px 24px}
+
+.board{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;min-height:400px}
+.col{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:12px;border:0.5px solid var(--color-border-tertiary)}
+.col-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.col-title{font-size:12px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.6px}
+.col-count{font-size:11px;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:10px;padding:1px 7px;color:var(--color-text-secondary)}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:11px 12px;margin-bottom:8px;cursor:pointer;transition:border-color .15s}
+.card:hover{border-color:var(--color-border-primary)}
+.card-id{font-size:11px;color:var(--color-text-tertiary);margin-bottom:4px;font-family:var(--font-mono)}
+.card-title{font-size:13px;color:var(--color-text-primary);line-height:1.4;margin-bottom:8px}
+.card-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.badge{font-size:11px;padding:2px 7px;border-radius:10px;font-weight:500}
+.badge-bug{background:#FCEBEB;color:#A32D2D}
+.badge-feature{background:#E6F1FB;color:#185FA5}
+.badge-task{background:#EAF3DE;color:#3B6D11}
+.badge-high{background:#FAEEDA;color:#854F0B}
+.badge-medium{background:#F1EFE8;color:#5F5E5A}
+.badge-low{background:#E1F5EE;color:#0F6E56}
+.avatar{width:20px;height:20px;border-radius:50%;background:#111;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:500;color:#fff}
+
+.issues-view{display:none}
+.issues-filters{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.issues-filters input{padding:7px 12px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px;width:200px}
+.issues-table{width:100%;border-collapse:collapse}
+.issues-table th{text-align:left;font-size:11px;font-weight:500;color:var(--color-text-secondary);padding:8px 12px;border-bottom:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary)}
+.issues-table td{padding:10px 12px;font-size:13px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary)}
+.issues-table tr:hover td{background:var(--color-background-secondary)}
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}
+.dot-todo{background:#888}
+.dot-progress{background:#378ADD}
+.dot-testing{background:#EF9F27}
+.dot-done{background:#639922}
+
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--color-background-primary);border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary);width:540px;max-width:95vw;padding:24px;max-height:80vh;overflow-y:auto}
+.modal h2{font-size:16px;font-weight:500;margin-bottom:16px;color:var(--color-text-primary)}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:12px;color:var(--color-text-secondary);margin-bottom:5px}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:8px 10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px;font-family:var(--font-sans)}
+.form-group textarea{height:90px;resize:vertical}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+
+.detail-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:flex-start;justify-content:flex-end}
+.detail-overlay.open{display:flex}
+.detail-panel{background:var(--color-background-primary);width:440px;max-width:95vw;height:100%;overflow-y:auto;border-left:0.5px solid var(--color-border-tertiary);padding:24px}
+.detail-tag{font-size:11px;color:var(--color-text-tertiary);font-family:var(--font-mono);margin-bottom:8px}
+.detail-title{font-size:17px;font-weight:500;color:var(--color-text-primary);margin-bottom:16px;line-height:1.4}
+.detail-section{margin-bottom:16px;padding-bottom:16px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.detail-label{font-size:11px;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px}
+.detail-value{font-size:13px;color:var(--color-text-primary)}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.steps-list{margin:0;padding-left:18px;font-size:13px;color:var(--color-text-primary);line-height:1.8}
+.comment-box{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px;font-size:13px;color:var(--color-text-primary);margin-bottom:8px}
+.comment-meta{font-size:11px;color:var(--color-text-tertiary);margin-top:4px}
+
+.sprint-info{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+.sprint-badge{background:#111;color:#fff;font-size:11px;padding:3px 10px;border-radius:10px;font-weight:500}
+.sprint-stats{display:flex;gap:16px}
+.sprint-stat{text-align:right}
+.sprint-stat-val{font-size:18px;font-weight:500;color:var(--color-text-primary)}
+.sprint-stat-lbl{font-size:11px;color:var(--color-text-tertiary)}
+
+.view-board,.view-issues,.view-new{display:none}
+.view-board.active,.view-issues.active,.view-new.active{display:block}
+
+.empty-col{text-align:center;padding:20px 8px;color:var(--color-text-tertiary);font-size:12px}
+</style>
+
+<h2 class="sr-only">Nike.com bug tracking system — Scrum board with issues, sprints, and bug reports</h2>
+
+<div class="app">
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <span class="nike-swoosh">✓ Nike</span>
+    </div>
+    <div style="padding:12px 16px 8px;border-bottom:0.5px solid var(--color-border-tertiary)">
+      <div style="font-size:13px;font-weight:500;color:var(--color-text-primary)">nike.com QA</div>
+      <div style="font-size:11px;color:var(--color-text-tertiary);margin-top:2px">Web Platform Team</div>
+    </div>
+    <div class="sidebar-proj">Navigation</div>
+    <div class="nav-item active" id="nav-board" onclick="showView('board')"><i class="ti ti-layout-kanban" aria-hidden="true"></i> Board</div>
+    <div class="nav-item" id="nav-issues" onclick="showView('issues')"><i class="ti ti-list" aria-hidden="true"></i> Issues</div>
+    <div class="nav-item" id="nav-new" onclick="openModal()"><i class="ti ti-plus" aria-hidden="true"></i> New issue</div>
+    <div class="sidebar-proj" style="margin-top:16px">Labels</div>
+    <div style="padding:8px 16px;display:flex;flex-direction:column;gap:6px">
+      <div style="display:flex;align-items:center;gap:8px"><span class="badge badge-bug">bug</span><span style="font-size:12px;color:var(--color-text-secondary)" id="lbl-bug-count"></span></div>
+      <div style="display:flex;align-items:center;gap:8px"><span class="badge badge-feature">feature</span><span style="font-size:12px;color:var(--color-text-secondary)" id="lbl-feat-count"></span></div>
+      <div style="display:flex;align-items:center;gap:8px"><span class="badge badge-task">task</span><span style="font-size:12px;color:var(--color-text-secondary)" id="lbl-task-count"></span></div>
+    </div>
+    <div class="sidebar-proj" style="margin-top:16px">Team</div>
+    <div style="padding:8px 16px;display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;align-items:center;gap:8px"><span class="avatar">AK</span><span style="font-size:12px;color:var(--color-text-secondary)">Anna K.</span></div>
+      <div style="display:flex;align-items:center;gap:8px"><span class="avatar" style="background:#185FA5">DM</span><span style="font-size:12px;color:var(--color-text-secondary)">Dmitry M.</span></div>
+      <div style="display:flex;align-items:center;gap:8px"><span class="avatar" style="background:#3B6D11">SP</span><span style="font-size:12px;color:var(--color-text-secondary)">Sara P.</span></div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="view-title">Kanban board</div>
+        <div class="topbar-sub" id="view-sub">Sprint 1 · nike.com Web Platform</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" onclick="showView('issues')"><i class="ti ti-filter" aria-hidden="true"></i> Filter</button>
+        <button class="btn btn-primary" onclick="openModal()"><i class="ti ti-plus" aria-hidden="true"></i> New issue</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- BOARD VIEW -->
+      <div class="view-board active" id="view-board">
+        <div class="sprint-info">
+          <div>
+            <span class="sprint-badge">Sprint 1</span>
+            <span style="font-size:13px;color:var(--color-text-secondary);margin-left:10px">Jun 2 – Jun 15, 2026</span>
+          </div>
+          <div class="sprint-stats">
+            <div class="sprint-stat"><div class="sprint-stat-val" id="stat-total">0</div><div class="sprint-stat-lbl">Total issues</div></div>
+            <div class="sprint-stat"><div class="sprint-stat-val" id="stat-bugs">0</div><div class="sprint-stat-lbl">Bugs</div></div>
+            <div class="sprint-stat"><div class="sprint-stat-val" id="stat-done">0</div><div class="sprint-stat-lbl">Done</div></div>
+          </div>
+        </div>
+
+        <div class="board">
+          <div class="col">
+            <div class="col-header"><span class="col-title">To do</span><span class="col-count" id="cnt-todo">0</span></div>
+            <div id="col-todo"></div>
+          </div>
+          <div class="col">
+            <div class="col-header"><span class="col-title" style="color:#185FA5">In progress</span><span class="col-count" id="cnt-progress">0</span></div>
+            <div id="col-progress"></div>
+          </div>
+          <div class="col">
+            <div class="col-header"><span class="col-title" style="color:#854F0B">Testing</span><span class="col-count" id="cnt-testing">0</span></div>
+            <div id="col-testing"></div>
+          </div>
+          <div class="col">
+            <div class="col-header"><span class="col-title" style="color:#3B6D11">Done</span><span class="col-count" id="cnt-done">0</span></div>
+            <div id="col-done"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ISSUES VIEW -->
+      <div class="view-issues" id="view-issues">
+        <div class="issues-filters">
+          <input type="text" id="search-input" placeholder="Search issues..." oninput="renderAll()">
+          <select id="filter-type" onchange="renderAll()" class="btn" style="padding:7px 10px">
+            <option value="">All types</option>
+            <option value="bug">Bug</option>
+            <option value="feature">Feature</option>
+            <option value="task">Task</option>
+          </select>
+          <select id="filter-status" onchange="renderAll()" class="btn" style="padding:7px 10px">
+            <option value="">All statuses</option>
+            <option value="todo">To do</option>
+            <option value="progress">In progress</option>
+            <option value="testing">Testing</option>
+            <option value="done">Done</option>
+          </select>
+        </div>
+        <table class="issues-table">
+          <thead>
+            <tr>
+              <th style="width:80px">ID</th>
+              <th>Title</th>
+              <th style="width:90px">Type</th>
+              <th style="width:90px">Priority</th>
+              <th style="width:90px">Status</th>
+              <th style="width:80px">Assignee</th>
+            </tr>
+          </thead>
+          <tbody id="issues-tbody"></tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- NEW ISSUE MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h2>New issue</h2>
+    <div class="form-group">
+      <label>Title *</label>
+      <input type="text" id="f-title" placeholder="e.g. [БАГ] Cart total wrong on mobile">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Type</label>
+        <select id="f-type">
+          <option value="bug">Bug</option>
+          <option value="feature">Feature</option>
+          <option value="task">Task</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Priority</label>
+        <select id="f-priority">
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Steps to reproduce / Description</label>
+      <textarea id="f-desc" placeholder="1. Open nike.com&#10;2. Add item to cart&#10;3. ..."></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Expected result</label>
+        <input type="text" id="f-expected" placeholder="What should happen">
+      </div>
+      <div class="form-group">
+        <label>Actual result</label>
+        <input type="text" id="f-actual" placeholder="What actually happens">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Assignee</label>
+        <select id="f-assignee">
+          <option value="AK">Anna K.</option>
+          <option value="DM">Dmitry M.</option>
+          <option value="SP">Sara P.</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="f-status">
+          <option value="todo">To do</option>
+          <option value="progress">In progress</option>
+          <option value="testing">Testing</option>
+          <option value="done">Done</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="createIssue()"><i class="ti ti-plus" aria-hidden="true"></i> Create issue</button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL PANEL -->
+<div class="detail-overlay" id="detail-overlay" onclick="closeDetail(event)">
+  <div class="detail-panel" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <span class="detail-tag" id="d-id"></span>
+      <button class="btn" onclick="closeDetail()" style="padding:4px 8px"><i class="ti ti-x" aria-hidden="true"></i></button>
+    </div>
+    <div class="detail-title" id="d-title"></div>
+    <div class="detail-section">
+      <div class="detail-grid">
+        <div><div class="detail-label">Status</div><div class="detail-value" id="d-status"></div></div>
+        <div><div class="detail-label">Priority</div><div class="detail-value" id="d-priority"></div></div>
+        <div><div class="detail-label">Type</div><div class="detail-value" id="d-type"></div></div>
+        <div><div class="detail-label">Assignee</div><div class="detail-value" id="d-assignee"></div></div>
+        <div><div class="detail-label">Milestone</div><div class="detail-value">Sprint 1</div></div>
+        <div><div class="detail-label">Created</div><div class="detail-value" id="d-created"></div></div>
+      </div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-label" style="margin-bottom:8px">Description / Steps</div>
+      <div class="detail-value" id="d-desc" style="white-space:pre-wrap;line-height:1.7"></div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-label" style="margin-bottom:6px">Expected result</div>
+      <div class="detail-value" id="d-expected"></div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-label" style="margin-bottom:6px">Actual result</div>
+      <div class="detail-value" id="d-actual" style="color:var(--color-text-danger)"></div>
+    </div>
+    <div>
+      <div class="detail-label" style="margin-bottom:8px">Change status</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap" id="d-status-btns"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const STATUSES = {todo:'To do',progress:'In progress',testing:'Testing',done:'Done'};
+const STATUS_COLORS = {todo:'#888',progress:'#378ADD',testing:'#EF9F27',done:'#639922'};
+const AVATAR_COLORS = {AK:'#111',DM:'#185FA5',SP:'#3B6D11'};
+const ASSIGNEE_NAMES = {AK:'Anna K.',DM:'Dmitry M.',SP:'Sara P.'};
+
+let counter = 10;
+let issues = [
+  {id:'NK-01',title:'[БАГ] При пустом пароле нет сообщения об ошибке',type:'bug',priority:'high',status:'testing',assignee:'AK',
+   desc:'Шаги воспроизведения:\n1. Ввести валидный email\n2. Оставить поле пароля пустым\n3. Нажать Login',
+   expected:'Появляется сообщение «Пароль не может быть пустым»',
+   actual:'Ничего не происходит, кнопка не реагирует',created:'09 Jun 2026'},
+  {id:'NK-02',title:'[БАГ] Изображение товара не загружается на странице /men/shoes',type:'bug',priority:'high',status:'progress',assignee:'DM',
+   desc:'Шаги воспроизведения:\n1. Открыть nike.com/men/shoes\n2. Прокрутить вниз до 2-го ряда товаров',
+   expected:'Все изображения товаров загружаются в течение 2 секунд',
+   actual:'Placeholder вместо фото — ошибка 404 на CDN',created:'09 Jun 2026'},
+  {id:'NK-03',title:'[БАГ] Кнопка "Add to Bag" неактивна на iOS Safari 17',type:'bug',priority:'medium',status:'todo',assignee:'SP',
+   desc:'Шаги воспроизведения:\n1. Открыть страницу товара на iPhone (iOS 17, Safari)\n2. Выбрать размер\n3. Нажать Add to Bag',
+   expected:'Товар добавляется в корзину',
+   actual:'Кнопка не реагирует на тап',created:'09 Jun 2026'},
+  {id:'NK-04',title:'[БАГ] Неправильный расчёт скидки при промокоде SUMMER20',type:'bug',priority:'high',status:'todo',assignee:'AK',
+   desc:'Шаги воспроизведения:\n1. Добавить товар стоимостью 120 USD\n2. Ввести промокод SUMMER20 (скидка 20%)\n3. Проверить итог',
+   expected:'Итог: 96.00 USD',
+   actual:'Итог: 100.00 USD — скидка 16.67% вместо 20%',created:'09 Jun 2026'},
+  {id:'NK-05',title:'Добавить фильтр по размеру в каталог женской обуви',type:'feature',priority:'medium',status:'progress',assignee:'DM',
+   desc:'Пользователи не могут фильтровать товары по размеру на странице /women/shoes. Необходимо добавить мультиселект для размеров EU 35–42.',
+   expected:'Фильтр по размеру доступен и работает',
+   actual:'Фильтра нет — только по цене и цвету',created:'08 Jun 2026'},
+  {id:'NK-06',title:'Написать авторегрессионные тесты для страницы оформления заказа',type:'task',priority:'medium',status:'todo',assignee:'SP',
+   desc:'Покрыть E2E-тестами (Playwright) основной флоу: корзина → доставка → оплата → подтверждение.',
+   expected:'100% покрытие критического пути',
+   actual:'Тесты ещё не написаны',created:'08 Jun 2026'},
+  {id:'NK-07',title:'[БАГ] Поле поиска не сбрасывается при переходе между категориями',type:'bug',priority:'low',status:'done',assignee:'AK',
+   desc:'Шаги воспроизведения:\n1. Ввести запрос в поле поиска\n2. Перейти в другую категорию через меню',
+   expected:'Поле поиска очищается',
+   actual:'Предыдущий запрос остаётся в поле',created:'07 Jun 2026'},
+  {id:'NK-08',title:'Оптимизировать скорость загрузки главной страницы (LCP > 4s)',type:'task',priority:'high',status:'progress',assignee:'DM',
+   desc:'По данным Lighthouse LCP = 4.2s. Цель — снизить до < 2.5s. Сжать hero-изображение, добавить lazy loading.',
+   expected:'LCP < 2.5 секунды',
+   actual:'LCP = 4.2 секунды',created:'07 Jun 2026'},
+];
+
+let activeIssue = null;
+
+function showView(v){
+  document.querySelectorAll('.view-board,.view-issues').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+  if(v==='board'){
+    document.getElementById('view-board').classList.add('active');
+    document.getElementById('nav-board').classList.add('active');
+    document.getElementById('view-title').textContent='Kanban board';
+    document.getElementById('view-sub').textContent='Sprint 1 · nike.com Web Platform';
+  } else {
+    document.getElementById('view-issues').classList.add('active');
+    document.getElementById('nav-issues').classList.add('active');
+    document.getElementById('view-title').textContent='Issues';
+    document.getElementById('view-sub').textContent='All issues · Sprint 1';
+  }
+  renderAll();
+}
+
+function renderAll(){
+  renderBoard();
+  renderIssuesList();
+  renderSidebar();
+}
+
+function makeCard(issue){
+  const d = document.createElement('div');
+  d.className='card';
+  d.onclick=()=>openDetail(issue.id);
+  d.innerHTML=`<div class="card-id">${issue.id}</div>
+  <div class="card-title">${issue.title}</div>
+  <div class="card-meta">
+    <span class="badge badge-${issue.type}">${issue.type}</span>
+    <span class="badge badge-${issue.priority}">${issue.priority}</span>
+    <span class="avatar" style="background:${AVATAR_COLORS[issue.assignee]}">${issue.assignee}</span>
+  </div>`;
+  return d;
+}
+
+function renderBoard(){
+  const cols={todo:[],progress:[],testing:[],done:[]};
+  issues.forEach(i=>cols[i.status]&&cols[i.status].push(i));
+  ['todo','progress','testing','done'].forEach(s=>{
+    const el=document.getElementById('col-'+s);
+    const cnt=document.getElementById('cnt-'+s);
+    el.innerHTML='';
+    if(cols[s].length===0){
+      el.innerHTML='<div class="empty-col"><i class="ti ti-inbox" style="font-size:20px;display:block;margin-bottom:4px" aria-hidden="true"></i>Empty</div>';
+    } else {
+      cols[s].forEach(i=>el.appendChild(makeCard(i)));
+    }
+    cnt.textContent=cols[s].length;
+  });
+  document.getElementById('stat-total').textContent=issues.length;
+  document.getElementById('stat-bugs').textContent=issues.filter(i=>i.type==='bug').length;
+  document.getElementById('stat-done').textContent=issues.filter(i=>i.status==='done').length;
+}
+
+function renderIssuesList(){
+  const q=(document.getElementById('search-input')||{value:''}).value.toLowerCase();
+  const ft=(document.getElementById('filter-type')||{value:''}).value;
+  const fs=(document.getElementById('filter-status')||{value:''}).value;
+  const tbody=document.getElementById('issues-tbody');
+  if(!tbody)return;
+  let filtered=issues.filter(i=>{
+    if(q&&!i.title.toLowerCase().includes(q)&&!i.id.toLowerCase().includes(q))return false;
+    if(ft&&i.type!==ft)return false;
+    if(fs&&i.status!==fs)return false;
+    return true;
+  });
+  tbody.innerHTML=filtered.map(i=>`
+    <tr onclick="openDetail('${i.id}')" style="cursor:pointer">
+      <td style="font-family:var(--font-mono);font-size:11px;color:var(--color-text-tertiary)">${i.id}</td>
+      <td>${i.title}</td>
+      <td><span class="badge badge-${i.type}">${i.type}</span></td>
+      <td><span class="badge badge-${i.priority}">${i.priority}</span></td>
+      <td><span class="status-dot dot-${i.status}"></span>${STATUSES[i.status]}</td>
+      <td><span class="avatar" style="background:${AVATAR_COLORS[i.assignee]}">${i.assignee}</span></td>
+    </tr>`).join('');
+}
+
+function renderSidebar(){
+  document.getElementById('lbl-bug-count').textContent=issues.filter(i=>i.type==='bug').length;
+  document.getElementById('lbl-feat-count').textContent=issues.filter(i=>i.type==='feature').length;
+  document.getElementById('lbl-task-count').textContent=issues.filter(i=>i.type==='task').length;
+}
+
+function openModal(){
+  document.getElementById('modal-overlay').classList.add('open');
+  document.getElementById('f-title').value='';
+  document.getElementById('f-desc').value='';
+  document.getElementById('f-expected').value='';
+  document.getElementById('f-actual').value='';
+}
+function closeModal(e){
+  if(!e||e.target===document.getElementById('modal-overlay'))
+    document.getElementById('modal-overlay').classList.remove('open');
+}
+
+function createIssue(){
+  const title=document.getElementById('f-title').value.trim();
+  if(!title){document.getElementById('f-title').style.borderColor='var(--color-border-danger)';return;}
+  counter++;
+  const id='NK-'+String(counter).padStart(2,'0');
+  issues.unshift({
+    id,title,
+    type:document.getElementById('f-type').value,
+    priority:document.getElementById('f-priority').value,
+    status:document.getElementById('f-status').value,
+    assignee:document.getElementById('f-assignee').value,
+    desc:document.getElementById('f-desc').value,
+    expected:document.getElementById('f-expected').value,
+    actual:document.getElementById('f-actual').value,
+    created:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})
+  });
+  document.getElementById('modal-overlay').classList.remove('open');
+  renderAll();
+}
+
+function openDetail(id){
+  const issue=issues.find(i=>i.id===id);
+  if(!issue)return;
+  activeIssue=id;
+  document.getElementById('d-id').textContent=issue.id+' · Sprint 1';
+  document.getElementById('d-title').textContent=issue.title;
+  document.getElementById('d-status').innerHTML=`<span class="status-dot dot-${issue.status}"></span>${STATUSES[issue.status]}`;
+  document.getElementById('d-priority').innerHTML=`<span class="badge badge-${issue.priority}">${issue.priority}</span>`;
+  document.getElementById('d-type').innerHTML=`<span class="badge badge-${issue.type}">${issue.type}</span>`;
+  document.getElementById('d-assignee').innerHTML=`<span class="avatar" style="background:${AVATAR_COLORS[issue.assignee]}">${issue.assignee}</span> ${ASSIGNEE_NAMES[issue.assignee]}`;
+  document.getElementById('d-created').textContent=issue.created;
+  document.getElementById('d-desc').textContent=issue.desc||'—';
+  document.getElementById('d-expected').textContent=issue.expected||'—';
+  document.getElementById('d-actual').textContent=issue.actual||'—';
+  const btns=document.getElementById('d-status-btns');
+  btns.innerHTML=Object.entries(STATUSES).map(([k,v])=>`
+    <button class="btn" style="${issue.status===k?'background:var(--color-background-secondary);font-weight:500':''}"
+      onclick="changeStatus('${id}','${k}')">${v}</button>`).join('');
+  document.getElementById('detail-overlay').classList.add('open');
+}
+
+function changeStatus(id,status){
+  const issue=issues.find(i=>i.id===id);
+  if(issue){issue.status=status;renderAll();openDetail(id);}
+}
+
+function closeDetail(e){
+  if(!e||e.target===document.getElementById('detail-overlay'))
+    document.getElementById('detail-overlay').classList.remove('open');
+}
+
+renderAll();
+</script>
